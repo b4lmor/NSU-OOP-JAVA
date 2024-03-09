@@ -1,0 +1,5 @@
+nick:4
+yammi:6
+kkk:2
+snaker:9999
+player:4
