@@ -1,0 +1,7 @@
+rootProject.name = 'NSU-OOP-JAVA'
+
+include 'lab-1'
+include 'lab-2'
+include 'lab-3'
+include 'lab-4'
+include 'lab-5'
