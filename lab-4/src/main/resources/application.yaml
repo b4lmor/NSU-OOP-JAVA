@@ -1,0 +1,11 @@
+factory:
+  storage-body-size: 5
+  storage-motor-size: 3
+  storage-accessory-size: 8
+  storage-car-size: 5
+  accessory-suppliers: 2
+  body-suppliers: 1
+  motor-suppliers: 1
+  workers: 2
+  dealers: 2
+  log-sale: true
