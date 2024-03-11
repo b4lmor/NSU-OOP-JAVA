@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.lisitsin;
 
 import lombok.SneakyThrows;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -27,8 +28,12 @@ public class CarFactoryApp {
 
         ExecutorService carFactoryExecutor = Executors.newFixedThreadPool(2);
 
-        carFactoryExecutor.submit(() -> new CarFactoryGui().createGui(carFactory));
-        carFactoryExecutor.submit(carFactory::start);
+        carFactoryExecutor.submit(() -> {
+            new CarFactoryGui().createGui(carFactory);
+        });
+        carFactoryExecutor.submit(() -> {
+            carFactory.start();
+        });
 
     }
 

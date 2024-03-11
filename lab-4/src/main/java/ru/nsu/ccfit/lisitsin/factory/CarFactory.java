@@ -3,6 +3,7 @@ package ru.nsu.ccfit.lisitsin.factory;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.nsu.ccfit.lisitsin.configuration.CarFactoryPropertiesConfig;
@@ -22,6 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 @Getter
+@Log4j2
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CarFactory {
@@ -117,23 +119,28 @@ public class CarFactory {
             }
         });
 
-        wait();
+        synchronized (this) {
+            this.wait();
+        }
 
-        carController.stop();
         isStarted = false;
+        carController.stop();
 
         motorSupExecutor.shutdownNow();
         bodySupExecutor.shutdownNow();
         accessorySupExecutor.shutdownNow();
         workerExecutor.shutdownNow();
         dealerExecutor.shutdownNow();
-        carControllerExecutor.shutdown();
-        carFactoryRoutine.shutdown();
+        carControllerExecutor.shutdownNow();
+        carFactoryRoutine.shutdownNow();
+
+        log.info("[CAR FACTORY] :: finished.");
 
     }
 
     public void stop() {
-        notify();
+        log.info("[CAR-FACTORY] :: Closing ...");
+        isStarted = false;
     }
 
 }
