@@ -1,3 +1,4 @@
 chat:
   server:
     port: 8081
+    data-transfer-protocol: java_object

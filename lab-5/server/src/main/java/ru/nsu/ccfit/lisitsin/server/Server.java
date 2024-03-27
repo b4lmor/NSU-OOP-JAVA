@@ -4,18 +4,23 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import ru.nsu.ccfit.lisitsin.chain.FilterChain;
 import ru.nsu.ccfit.lisitsin.configuration.ServerPropertiesConfiguration;
+import ru.nsu.ccfit.lisitsin.dto.BaseDto;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -28,31 +33,39 @@ public class Server implements Closeable {
     private final ServerSocket server;
 
     @Getter
-    private final List<Connection> connections;
+    private final Map<UUID, Connection> connections;
+
+    private final Deque<BaseDto> requests;
+
+    private final FilterChain filterChain;
+
+    private final Scanner scanner = new Scanner(System.in);
 
     private boolean isStarted = false;
 
     @SneakyThrows
     @Autowired
-    public Server(ServerPropertiesConfiguration configuration) {
+    public Server(ServerPropertiesConfiguration configuration, FilterChain filterChain) {
         this.server = new ServerSocket(configuration.port());
-        this.connections = new ArrayList<>();
+        this.connections = new HashMap<>();
+        this.requests = new ArrayDeque<>();
+        this.filterChain = filterChain;
     }
 
     @SneakyThrows
-    @EventListener(ContextRefreshedEvent.class)
+    @EventListener(ApplicationReadyEvent.class)
     public void run() {
         isStarted = true;
 
-        ExecutorService serverRoutine = Executors.newFixedThreadPool(2);
+        ExecutorService serverRoutine = Executors.newFixedThreadPool(3);
 
         serverRoutine.submit(() -> {
             while (isStarted) {
                 try {
                     log.info("[SERVER] :: Waiting for a new socket ...");
                     Socket socket = server.accept();
-                    log.info("[SERVER] :: Socket accepted!");
-                    connections.add(new Connection(socket, this));
+                    registerConnection(socket);
+                    log.info("[SERVER] :: Socket accepted and saved!");
                 } catch (IOException e) {
                     if (isStarted) {
                         log.error("[SERVER] :: Can't accept client's socket!");
@@ -62,25 +75,57 @@ public class Server implements Closeable {
         });
 
         serverRoutine.submit(() -> {
-            Scanner scanner = new Scanner(System.in);
-            while (true) {
+            while (isStarted) {
                 String input = scanner.nextLine();
                 if (EXIT_COMMAND.equalsIgnoreCase(input)) {
+                    log.info("[SERVER] :: Exiting ...");
                     this.close();
-                    break;
                 }
             }
-            scanner.close();
-            serverRoutine.shutdown();
-            log.info("[SERVER] :: Exit");
         });
+
+        serverRoutine.submit(() -> {
+            while (isStarted) {
+                if (!requests.isEmpty()) {
+                    var dto = requests.poll();
+                    process(dto);
+                }
+            }
+        });
+
+        serverRoutine.shutdown();
+    }
+
+    public void receive(BaseDto request) {
+        log.trace("[SERVER] :: Received a new dto.");
+        requests.add(request);
+    }
+
+    public void process(BaseDto request) {
+        log.trace("[SERVER] :: Processing a request ...");
+        filterChain.process(request);
+        log.trace("[SERVER] :: Processing a request ... Done!");
+    }
+
+    public void answer(BaseDto response) {
+        log.trace("[SERVER] :: Answering ...");
+
+        log.trace("[SERVER] :: Answering ... Done!");
     }
 
     @SneakyThrows
     public void close() {
+        log.info("[SERVER] :: Exiting ...");
         isStarted = false;
+        scanner.close();
+        connections.values().forEach(Connection::close);
         server.close();
-        connections.forEach(Connection::close);
+        log.info("[SERVER] :: Exiting ... Done!");
+    }
+
+    private void registerConnection(Socket socket) {
+        UUID id = UUID.randomUUID();
+        connections.put(id, new Connection(id, socket, this));
     }
 
 }

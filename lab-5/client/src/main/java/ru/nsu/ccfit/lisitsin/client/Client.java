@@ -7,13 +7,13 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import ru.nsu.ccfit.lisitsin.configuration.ClientPropertiesConfiguration;
+import ru.nsu.ccfit.lisitsin.dto.request.MessageRequest;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -30,7 +30,7 @@ public class Client implements Closeable {
 
     private final BufferedReader in;
 
-    private final BufferedWriter out;
+    private final ObjectOutputStream out;
 
     private boolean isStarted = false;
 
@@ -40,7 +40,7 @@ public class Client implements Closeable {
             this.clientSocket = new Socket(configuration.host(), configuration.port());
             this.reader = new BufferedReader(new InputStreamReader(System.in));
             this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            this.out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+            this.out = new ObjectOutputStream(clientSocket.getOutputStream());
         } catch (Throwable e) {
             log.error("[CLIENT] :: Can't connect to the server!");
             throw new RuntimeException("Can't connect to the server! " + e);
@@ -57,17 +57,16 @@ public class Client implements Closeable {
         clientRoutine.submit(() -> {
             while (isStarted) {
                 try {
-                    String word = reader.readLine();
-
-                    if (!EXIT_COMMAND.equals(word)) {
-                        log.info("[Client] :: Sending message ...");
-                        out.write(word + "\n");
-                        out.flush();
-                        continue;
+                    String message = reader.readLine();
+                    if (EXIT_COMMAND.equalsIgnoreCase(message)) {
+                        this.close();
+                        log.info("[Client] :: Exit");
+                        break;
                     }
-
-                    this.close();
-                    log.info("[Client] :: Exit");
+                    log.debug("[Client] :: Sending message ...");
+                    out.writeObject(MessageRequest.builder().message(message).build());
+                    out.flush();
+                    log.debug("[Client] :: Sending message ... Done!");
 
                 } catch (IOException e) {
                     log.error("[CLIENT] :: Can't send message!");
@@ -83,7 +82,9 @@ public class Client implements Closeable {
                     String serverWord = in.readLine();
                     System.out.println(serverWord);
                 } catch (IOException e) {
-                    log.error("[CLIENT] :: Can't read message!");
+                    if (isStarted) {
+                        log.error("[CLIENT] :: Can't read message!");
+                    }
                 }
             }
         });
@@ -93,9 +94,9 @@ public class Client implements Closeable {
     @SneakyThrows
     public void close() {
         isStarted = false;
-        this.clientSocket.close();
-        this.in.close();
-        this.out.close();
-        this.reader.close();
+        clientSocket.close();
+        in.close();
+        out.close();
+        reader.close();
     }
 }

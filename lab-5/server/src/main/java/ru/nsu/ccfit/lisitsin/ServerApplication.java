@@ -11,7 +11,7 @@ import ru.nsu.ccfit.lisitsin.configuration.ServerPropertiesConfiguration;
 public class ServerApplication {
     public static void main(String[] args) {
 
-        var ctx = new SpringApplicationBuilder(ServerApplication.class)
+        new SpringApplicationBuilder(ServerApplication.class)
                 .headless(false)
                 .web(WebApplicationType.NONE)
                 .run(args);

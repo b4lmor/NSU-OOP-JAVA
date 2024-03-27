@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.lisitsin.configuration;
 
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
@@ -10,7 +11,10 @@ import org.springframework.validation.annotation.Validated;
 public record ServerPropertiesConfiguration(
 
         @Positive
-        int port
+        int port,
+
+        @NotNull
+        DataTransferProtocol dataTransferProtocol
 
 ) {
 }
