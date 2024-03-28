@@ -6,8 +6,6 @@ import ru.nsu.ccfit.lisitsin.dto.BaseDto;
 
 @Builder
 @Getter
-public class MessageRequest extends BaseDto {
-
-    private final String message;
+public class PageRequest extends BaseDto {
 
 }

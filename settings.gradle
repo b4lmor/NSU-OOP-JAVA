@@ -1,10 +1,18 @@
 rootProject.name = 'NSU-OOP-JAVA'
 
 include 'lab-1'
+
 include 'lab-2'
+
 include 'lab-3'
+
 include 'lab-4'
+
 include ':client'
 project(':client').projectDir = new File("./lab-5/client")
+
 include ':server'
 project(':server').projectDir = new File("./lab-5/server")
+
+include ':database'
+project(':database').projectDir = new File("./lab-5/database")

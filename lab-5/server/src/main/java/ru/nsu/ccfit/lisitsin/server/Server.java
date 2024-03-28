@@ -109,7 +109,7 @@ public class Server implements Closeable {
 
     public void answer(BaseDto response) {
         log.trace("[SERVER] :: Answering ...");
-
+        connections.get(response.getAuthorId()).send(response);
         log.trace("[SERVER] :: Answering ... Done!");
     }
 

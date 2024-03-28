@@ -56,7 +56,7 @@ public class Connection extends Thread implements Closeable {
     }
 
     @SneakyThrows
-    private void send(BaseDto dto) {
+    public void send(BaseDto dto) {
         out.writeObject(dto);
         out.flush();
     }

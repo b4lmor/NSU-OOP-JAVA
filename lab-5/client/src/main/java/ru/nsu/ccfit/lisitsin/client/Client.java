@@ -3,10 +3,11 @@ package ru.nsu.ccfit.lisitsin.client;
 import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import ru.nsu.ccfit.lisitsin.configuration.ClientPropertiesConfiguration;
+import ru.nsu.ccfit.lisitsin.dto.request.LoginRequest;
 import ru.nsu.ccfit.lisitsin.dto.request.MessageRequest;
 
 import java.io.BufferedReader;
@@ -30,7 +31,9 @@ public class Client implements Closeable {
 
     private final BufferedReader in;
 
-    private final ObjectOutputStream out;
+    //private final ObjectInputStream serverIn;
+
+    private final ObjectOutputStream serverOut;
 
     private boolean isStarted = false;
 
@@ -40,33 +43,39 @@ public class Client implements Closeable {
             this.clientSocket = new Socket(configuration.host(), configuration.port());
             this.reader = new BufferedReader(new InputStreamReader(System.in));
             this.in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            this.out = new ObjectOutputStream(clientSocket.getOutputStream());
+            //this.serverIn = new ObjectInputStream(clientSocket.getInputStream());
+            this.serverOut = new ObjectOutputStream(clientSocket.getOutputStream());
         } catch (Throwable e) {
             log.error("[CLIENT] :: Can't connect to the server!");
             throw new RuntimeException("Can't connect to the server! " + e);
         }
     }
 
-    @EventListener(ContextRefreshedEvent.class)
+    @EventListener(ApplicationReadyEvent.class)
     public void run() {
 
+        log.info("[CLIENT] :: Starting ...");
+
         isStarted = true;
+
+        login();
 
         ExecutorService clientRoutine = Executors.newFixedThreadPool(2);
 
         clientRoutine.submit(() -> {
             while (isStarted) {
                 try {
+                    log.info("[Client] :: Write your message:");
                     String message = reader.readLine();
                     if (EXIT_COMMAND.equalsIgnoreCase(message)) {
                         this.close();
                         log.info("[Client] :: Exit");
                         break;
                     }
-                    log.debug("[Client] :: Sending message ...");
-                    out.writeObject(MessageRequest.builder().message(message).build());
-                    out.flush();
-                    log.debug("[Client] :: Sending message ... Done!");
+                    log.info("[Client] :: Sending message ...");
+                    serverOut.writeObject(MessageRequest.builder().message(message).build());
+                    serverOut.flush();
+                    log.info("[Client] :: Sending message ... Done!");
 
                 } catch (IOException e) {
                     log.error("[CLIENT] :: Can't send message!");
@@ -91,12 +100,27 @@ public class Client implements Closeable {
 
     }
 
+    private void login() {
+        try {
+            log.info("[Client] :: Write your name:");
+            String name = reader.readLine();
+            log.info("[Client] :: Sending name ...");
+            serverOut.writeObject(LoginRequest.builder().name(name).build());
+            serverOut.flush();
+            log.info("[Client] :: Sending name ... Done!");
+
+        } catch (IOException e) {
+            log.error("[CLIENT] :: Can't send name!");
+        }
+    }
+
     @SneakyThrows
     public void close() {
         isStarted = false;
         clientSocket.close();
         in.close();
-        out.close();
+        //serverIn.close();
+        serverOut.close();
         reader.close();
     }
 }

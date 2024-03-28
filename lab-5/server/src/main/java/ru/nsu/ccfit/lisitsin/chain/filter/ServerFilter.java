@@ -16,6 +16,11 @@ public abstract class ServerFilter {
         }
     }
 
+    public ServerFilter setNextFilter(ServerFilter nextFilter) {
+        this.nextFilter = nextFilter;
+        return nextFilter;
+    }
+
     public boolean isEnabled() {
         return false;
     }

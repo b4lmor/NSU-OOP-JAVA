@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.nsu.ccfit.lisitsin.chain.FilterChain;
 import ru.nsu.ccfit.lisitsin.chain.filter.ServerFilter;
+import ru.nsu.ccfit.lisitsin.chain.filter.jofilter.LoginFilter;
 import ru.nsu.ccfit.lisitsin.chain.filter.jofilter.MessageFilter;
 import ru.nsu.ccfit.lisitsin.chain.jochain.JavaObjectFilterChain;
 import ru.nsu.ccfit.lisitsin.processor.JavaObjectChatProcessor;
@@ -18,7 +19,7 @@ public class FilterConfiguration {
     @ConditionalOnProperty(prefix = "chat", name = "server.data-transfer-protocol", havingValue = "java_object")
     public ServerFilter javaObjectFilters(JavaObjectChatProcessor javaObjectChatProcessor) {
         MessageFilter messageFilter = new MessageFilter(javaObjectChatProcessor);
-        // TODO: others
+        messageFilter.setNextFilter(new LoginFilter(javaObjectChatProcessor));
         return messageFilter;
     }
 

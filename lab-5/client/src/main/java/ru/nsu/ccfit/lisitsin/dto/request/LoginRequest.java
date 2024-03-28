@@ -6,8 +6,8 @@ import ru.nsu.ccfit.lisitsin.dto.BaseDto;
 
 @Builder
 @Getter
-public class MessageRequest extends BaseDto {
+public class LoginRequest extends BaseDto {
 
-    private final String message;
+    private final String name;
 
 }
