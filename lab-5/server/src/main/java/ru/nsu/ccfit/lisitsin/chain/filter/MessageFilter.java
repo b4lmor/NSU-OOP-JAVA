@@ -1,20 +1,19 @@
-package ru.nsu.ccfit.lisitsin.chain.filter.jofilter;
+package ru.nsu.ccfit.lisitsin.chain.filter;
 
 import lombok.RequiredArgsConstructor;
-import ru.nsu.ccfit.lisitsin.chain.filter.ServerFilter;
 import ru.nsu.ccfit.lisitsin.dto.BaseDto;
 import ru.nsu.ccfit.lisitsin.dto.request.MessageRequest;
-import ru.nsu.ccfit.lisitsin.processor.JavaObjectChatProcessor;
+import ru.nsu.ccfit.lisitsin.processor.ChatProcessor;
 
 @RequiredArgsConstructor
 public class MessageFilter extends ServerFilter {
 
-    private final JavaObjectChatProcessor javaObjectChatProcessor;
+    private final ChatProcessor chatProcessor;
 
     @Override
     public void doFilter(BaseDto request) {
         if (request instanceof MessageRequest messageRequest) {
-            javaObjectChatProcessor.processMessage(messageRequest);
+            chatProcessor.processMessage(messageRequest);
             return;
         }
         super.doFilter(request);

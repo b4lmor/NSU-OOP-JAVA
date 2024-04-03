@@ -2,17 +2,18 @@ BEGIN;
 
 CREATE TABLE messages
 (
-    id         UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    user_id    UUID                           NOT NULL,
-    text       TEXT                           NOT NULL,
-    created_at DATE DEFAULT CURRENT_TIMESTAMP NOT NULL
+    id         UUID PRIMARY KEY,
+    user_id    UUID NOT NULL,
+    text       TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE users
 (
-    id        UUID PRIMARY KEY,
-    name      VARCHAR(50) NOT NULL UNIQUE,
-    is_active BOOLEAN DEFAULT false
+    id             UUID PRIMARY KEY NOT NULL,
+    name           VARCHAR(50)      NOT NULL UNIQUE,
+    is_active      BOOLEAN   DEFAULT false,
+    last_active_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 ALTER TABLE messages

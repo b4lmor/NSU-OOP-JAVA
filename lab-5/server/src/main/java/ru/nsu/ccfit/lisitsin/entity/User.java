@@ -5,11 +5,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -21,16 +20,17 @@ import java.util.UUID;
 public class User {
 
     @Id
-    @Column(name = "id", nullable = false)
+    @Column(name = "id")
     private UUID id;
 
-    @Size(max = 50)
-    @NotNull
-    @Column(name = "name", nullable = false, length = 50)
+    @Column(name = "name")
     private String name;
 
     @Column(name = "is_active")
     private Boolean isActive;
+
+    @Column(name = "last_active_at")
+    private Date lastActiveAt;
 
     @OneToMany(mappedBy = "user")
     private Set<Message> messages = new LinkedHashSet<>();

@@ -73,7 +73,9 @@ public class Client implements Closeable {
                         break;
                     }
                     log.info("[Client] :: Sending message ...");
-                    serverOut.writeObject(MessageRequest.builder().message(message).build());
+                    MessageRequest messageRequest = new MessageRequest();
+                    messageRequest.setMessage(message);
+                    serverOut.writeObject(messageRequest);
                     serverOut.flush();
                     log.info("[Client] :: Sending message ... Done!");
 
@@ -105,7 +107,9 @@ public class Client implements Closeable {
             log.info("[Client] :: Write your name:");
             String name = reader.readLine();
             log.info("[Client] :: Sending name ...");
-            serverOut.writeObject(LoginRequest.builder().name(name).build());
+            LoginRequest loginRequest = new LoginRequest();
+            loginRequest.setName(name);
+            serverOut.writeObject(loginRequest);
             serverOut.flush();
             log.info("[Client] :: Sending name ... Done!");
 

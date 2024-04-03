@@ -65,9 +65,9 @@ public class Connection extends Thread implements Closeable {
     @SneakyThrows
     public void close() {
         isStarted = false;
-        socket.close();
         in.close();
         out.close();
+        socket.close();
         this.interrupt();
     }
 }

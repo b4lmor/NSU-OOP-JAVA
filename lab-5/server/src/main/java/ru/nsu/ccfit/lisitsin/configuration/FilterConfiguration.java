@@ -1,33 +1,36 @@
 package ru.nsu.ccfit.lisitsin.configuration;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.nsu.ccfit.lisitsin.chain.FilterChain;
+import ru.nsu.ccfit.lisitsin.chain.filter.DisconnectFilter;
+import ru.nsu.ccfit.lisitsin.chain.filter.LoginFilter;
+import ru.nsu.ccfit.lisitsin.chain.filter.MessageFilter;
+import ru.nsu.ccfit.lisitsin.chain.filter.MessagePageFilter;
 import ru.nsu.ccfit.lisitsin.chain.filter.ServerFilter;
-import ru.nsu.ccfit.lisitsin.chain.filter.jofilter.LoginFilter;
-import ru.nsu.ccfit.lisitsin.chain.filter.jofilter.MessageFilter;
-import ru.nsu.ccfit.lisitsin.chain.jochain.JavaObjectFilterChain;
-import ru.nsu.ccfit.lisitsin.processor.JavaObjectChatProcessor;
+import ru.nsu.ccfit.lisitsin.processor.ChatProcessor;
 
 @Configuration
 public class FilterConfiguration {
 
     @Autowired
     @Bean
-    @ConditionalOnProperty(prefix = "chat", name = "server.data-transfer-protocol", havingValue = "java_object")
-    public ServerFilter javaObjectFilters(JavaObjectChatProcessor javaObjectChatProcessor) {
-        MessageFilter messageFilter = new MessageFilter(javaObjectChatProcessor);
-        messageFilter.setNextFilter(new LoginFilter(javaObjectChatProcessor));
+    public ServerFilter filters(ChatProcessor chatProcessor) {
+        MessageFilter messageFilter = new MessageFilter(chatProcessor);
+
+        messageFilter
+                .setNextFilter(new MessagePageFilter(chatProcessor))
+                .setNextFilter(new LoginFilter(chatProcessor))
+                .setNextFilter(new DisconnectFilter(chatProcessor));
+
         return messageFilter;
     }
 
     @Autowired
     @Bean
-    @ConditionalOnProperty(prefix = "chat", name = "server.data-transfer-protocol", havingValue = "java_object")
-    public FilterChain javaObjectFilterChain(ServerFilter javaObjectFilters) {
-        return new JavaObjectFilterChain(javaObjectFilters);
+    public FilterChain filterChain(ServerFilter filters, ServerPropertiesConfiguration serverPropertiesConfiguration) {
+        return new FilterChain(filters, serverPropertiesConfiguration.dataTransferProtocol());
     }
 
 }

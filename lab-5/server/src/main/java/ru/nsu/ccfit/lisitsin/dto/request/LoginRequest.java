@@ -1,13 +1,13 @@
 package ru.nsu.ccfit.lisitsin.dto.request;
 
-import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import ru.nsu.ccfit.lisitsin.dto.BaseDto;
 
-@Builder
 @Getter
+@Setter
 public class LoginRequest extends BaseDto {
 
-    private final String name;
+    private String name;
 
 }
