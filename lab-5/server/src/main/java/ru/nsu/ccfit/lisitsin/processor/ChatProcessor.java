@@ -10,13 +10,18 @@ import ru.nsu.ccfit.lisitsin.dto.request.DisconnectRequest;
 import ru.nsu.ccfit.lisitsin.dto.request.LoginRequest;
 import ru.nsu.ccfit.lisitsin.dto.request.MessagePageRequest;
 import ru.nsu.ccfit.lisitsin.dto.request.MessageRequest;
+import ru.nsu.ccfit.lisitsin.dto.request.UsersRequest;
+import ru.nsu.ccfit.lisitsin.entity.User;
 import ru.nsu.ccfit.lisitsin.server.ConnectionManager;
 import ru.nsu.ccfit.lisitsin.service.MessageService;
 import ru.nsu.ccfit.lisitsin.service.UserService;
 
+import java.util.List;
+
 import static ru.nsu.ccfit.lisitsin.processor.Responses.getLoginIsAlreadyTaken;
 import static ru.nsu.ccfit.lisitsin.processor.Responses.getMessagePage;
 import static ru.nsu.ccfit.lisitsin.processor.Responses.getOk;
+import static ru.nsu.ccfit.lisitsin.processor.Responses.getUsers;
 
 @Slf4j
 @Component
@@ -43,9 +48,10 @@ public class ChatProcessor {
         answer(getOk(messageRequest.getAuthorId()));
     }
 
-    public void processPageRequest(MessagePageRequest messagePageRequest) {
-        log.info("[PROCESSOR] :: Sending messages ...");
+    public void processPage(MessagePageRequest messagePageRequest) {
+        log.info("[PROCESSOR] :: Getting messages ...");
         var messages = messageService.findMessagesSortedByCreatedAt(messagePageRequest);
+        log.info("[PROCESSOR] :: Sending messages ...");
         answer(getMessagePage(messagePageRequest.getAuthorId(), messages));
         log.info("[PROCESSOR] :: Sending messages ... Done!");
     }
@@ -63,10 +69,17 @@ public class ChatProcessor {
 
     public void processDisconnect(DisconnectRequest disconnectRequest) {
         log.info("[PROCESSOR] :: Disconnecting user ...");
-        userService.disconnect(disconnectRequest);
+        userService.disconnect(disconnectRequest.getAuthorId());
         log.info("[PROCESSOR] :: Disconnecting user ... Done!");
         userService.update(disconnectRequest.getAuthorId());
         answer(getOk(disconnectRequest.getAuthorId()));
+    }
+
+    public void processUsers(UsersRequest usersRequest) {
+        log.info("[PROCESSOR] :: Getting users ...");
+        List<User> users = userService.findAllActiveUsers();
+        log.info("[PROCESSOR] :: Getting users ... Done!");
+        answer(getUsers(usersRequest.getAuthorId(), users));
     }
 
     public void answer(BaseResponse response) {
@@ -78,5 +91,4 @@ public class ChatProcessor {
         }
         log.info("[PROCESSOR] :: Answering ... Done!");
     }
-
 }

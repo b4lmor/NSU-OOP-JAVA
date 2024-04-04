@@ -2,11 +2,13 @@ package ru.nsu.ccfit.lisitsin.processor;
 
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.UtilityClass;
-import org.springframework.data.domain.Page;
 import ru.nsu.ccfit.lisitsin.dto.reponse.BaseResponse;
 import ru.nsu.ccfit.lisitsin.dto.reponse.MessagePageResponse;
+import ru.nsu.ccfit.lisitsin.dto.reponse.UsersResponse;
 import ru.nsu.ccfit.lisitsin.entity.Message;
+import ru.nsu.ccfit.lisitsin.entity.User;
 
+import java.util.List;
 import java.util.UUID;
 
 @UtilityClass
@@ -20,19 +22,31 @@ public class Responses {
         return response;
     }
 
-    public static MessagePageResponse getMessagePage(UUID id, Page<Message> messages) {
+    public static UsersResponse getUsers(UUID id, List<User> users) {
+        var response = new UsersResponse();
+        response.setCode(Codes.OK.code);
+        response.setMessage("Ok");
+        response.setAuthorId(id);
+        response.setNames(users.stream().map(User::getName).toList());
+        return response;
+    }
+
+    public static MessagePageResponse getMessagePage(UUID id, List<Message> messages) {
         var response = new MessagePageResponse();
         response.setCode(Codes.OK.code);
         response.setMessage("Ok");
         response.setAuthorId(id);
-        response.setMessages(messages.stream()
-                .map(message -> new MessagePageResponse.MessageDto(
-                        message.getId(),
-                        message.getUser().getId(),
-                        message.getText(),
-                        message.getCreatedAt()
-                ))
-                .toList());
+        response.setMessages(
+                messages.stream()
+                        .map(message -> new MessagePageResponse.MessageDto(
+                                message.getId(),
+                                message.getUser().getId(),
+                                message.getText(),
+                                message.getCreatedAt(),
+                                message.getUser().getName()
+                        ))
+                        .toList()
+        );
         return response;
     }
 

@@ -3,6 +3,7 @@ package ru.nsu.ccfit.lisitsin.dto.reponse;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -21,9 +22,11 @@ public class MessagePageResponse extends BaseResponse {
 
             String text,
 
-            Date createdAt
+            Date createdAt,
 
-    ) {
+            String name
+
+    ) implements Serializable {
     }
 
 }

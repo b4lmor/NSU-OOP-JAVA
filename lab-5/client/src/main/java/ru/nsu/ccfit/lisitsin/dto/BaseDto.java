@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Setter
 @Getter
-public class BaseDto implements Serializable {
+public abstract class BaseDto implements Serializable {
 
     private UUID authorId;
 

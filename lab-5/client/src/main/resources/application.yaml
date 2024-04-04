@@ -2,3 +2,8 @@ chat:
   server:
     port: 8081
     host: localhost
+
+spring:
+  devtools:
+    livereload:
+      port: 35730

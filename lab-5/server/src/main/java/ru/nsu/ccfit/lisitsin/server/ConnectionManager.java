@@ -22,6 +22,11 @@ public class ConnectionManager {
         return Optional.ofNullable(connections.get(id));
     }
 
+    public static void remove(UUID id) {
+        get(id).ifPresent(Connection::close);
+        connections.remove(id);
+    }
+
     public static Collection<Connection> values() {
         return connections.values();
 

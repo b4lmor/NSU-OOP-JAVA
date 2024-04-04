@@ -11,7 +11,7 @@ CREATE TABLE messages
 CREATE TABLE users
 (
     id             UUID PRIMARY KEY NOT NULL,
-    name           VARCHAR(50)      NOT NULL UNIQUE,
+    name           VARCHAR(50)      NOT NULL,
     is_active      BOOLEAN   DEFAULT false,
     last_active_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

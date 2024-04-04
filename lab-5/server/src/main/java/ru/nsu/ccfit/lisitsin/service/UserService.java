@@ -4,12 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.nsu.ccfit.lisitsin.dto.request.DisconnectRequest;
 import ru.nsu.ccfit.lisitsin.dto.request.LoginRequest;
 import ru.nsu.ccfit.lisitsin.entity.User;
 import ru.nsu.ccfit.lisitsin.repository.UserRepository;
 
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -42,14 +42,6 @@ public class UserService {
     }
 
     @Transactional
-    public void disconnect(DisconnectRequest disconnectRequest) {
-        userRepository.findFirstByNameOrderByLastActiveAtDesc(disconnectRequest.getName()).ifPresent(user -> {
-            user.setIsActive(false);
-            userRepository.save(user);
-        });
-    }
-
-    @Transactional
     public void disconnect(UUID id) {
         userRepository.findById(id).ifPresent(user -> {
             user.setIsActive(false);
@@ -57,4 +49,7 @@ public class UserService {
         });
     }
 
+    public List<User> findAllActiveUsers() {
+        return userRepository.findByIsActiveTrue();
+    }
 }

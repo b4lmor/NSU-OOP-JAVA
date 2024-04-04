@@ -9,6 +9,7 @@ import ru.nsu.ccfit.lisitsin.chain.filter.LoginFilter;
 import ru.nsu.ccfit.lisitsin.chain.filter.MessageFilter;
 import ru.nsu.ccfit.lisitsin.chain.filter.MessagePageFilter;
 import ru.nsu.ccfit.lisitsin.chain.filter.ServerFilter;
+import ru.nsu.ccfit.lisitsin.chain.filter.UsersFilter;
 import ru.nsu.ccfit.lisitsin.processor.ChatProcessor;
 
 @Configuration
@@ -22,6 +23,7 @@ public class FilterConfiguration {
         messageFilter
                 .setNextFilter(new MessagePageFilter(chatProcessor))
                 .setNextFilter(new LoginFilter(chatProcessor))
+                .setNextFilter(new UsersFilter(chatProcessor))
                 .setNextFilter(new DisconnectFilter(chatProcessor));
 
         return messageFilter;

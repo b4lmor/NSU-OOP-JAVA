@@ -23,11 +23,15 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static java.lang.Thread.sleep;
+
 @Component
 @Log4j2
 public class Server implements Closeable {
 
     private static final String EXIT_COMMAND = "exit";
+
+    private static final long DELAY = 2000;
 
     private final ServerSocket server;
 
@@ -35,9 +39,9 @@ public class Server implements Closeable {
 
     private final FilterChain filterChain;
 
-    private final Scanner scanner = new Scanner(System.in);
-
     private final UserService userService;
+
+    private final Scanner scanner = new Scanner(System.in);
 
     private boolean isStarted = false;
 
@@ -55,7 +59,7 @@ public class Server implements Closeable {
     public void run() {
         isStarted = true;
 
-        ExecutorService serverRoutine = Executors.newFixedThreadPool(3);
+        ExecutorService serverRoutine = Executors.newFixedThreadPool(4);
 
         serverRoutine.submit(() -> {
             while (isStarted) {
@@ -91,18 +95,39 @@ public class Server implements Closeable {
             }
         });
 
+        serverRoutine.submit(() -> {
+            while (isStarted) {
+                ConnectionManager.values()
+                        .stream()
+                        .filter(Connection::isClosed)
+                        .forEach(connection -> {
+                            log.info(
+                                    "[SERVER] :: Deleting inactive connection with id {}.",
+                                    connection.getId()
+                            );
+                            userService.disconnect(connection.getConnectionId());
+                            ConnectionManager.remove(connection.getConnectionId());
+                        });
+                try {
+                    sleep(DELAY);
+                } catch (InterruptedException e) {
+                    log.error("[SERVER] :: Can't sleep.");
+                }
+            }
+        });
+
         serverRoutine.shutdown();
     }
 
     public void receive(BaseDto request) {
-        log.trace("[SERVER] :: Received a new dto.");
+        log.info("[SERVER] :: Received a new dto.");
         requests.add(request);
     }
 
     public void process(BaseDto request) {
-        log.trace("[SERVER] :: Processing a request ...");
+        log.info("[SERVER] :: Processing a request ...");
         filterChain.process(request);
-        log.trace("[SERVER] :: Processing a request ... Done!");
+        log.info("[SERVER] :: Processing a request ... Done!");
     }
 
     @SneakyThrows
