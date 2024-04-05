@@ -1,0 +1,17 @@
+buildscript {
+    dependencies {
+        classpath 'org.postgresql:postgresql:42.6.0'
+    }
+}
+
+plugins {
+    id 'org.flywaydb.flyway' version '9.21.0'
+}
+
+flyway {
+    url = 'jdbc:postgresql://localhost:5432/nsu-chat'
+    user = 'postgres'
+    password = 'postgres'
+    //schemas = ['gitalfa_service']
+    locations = ['filesystem:scripts']
+}

@@ -1,0 +1,11 @@
+chat:
+  server:
+    port: 8081
+    data-transfer-protocol: java_object
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/nsu-chat
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver

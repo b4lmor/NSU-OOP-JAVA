@@ -1,0 +1,14 @@
+services:
+  nsu-chat:
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: nsu-chat
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    networks:
+      - backend
+
+networks:
+  backend: { }
